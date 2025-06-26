@@ -1,0 +1,6 @@
+{
+  "name": "Advocacia MZ ERP",
+  "description": "An ERP system for law firms to manage clients, tasks, calendar, contracts, and finances, featuring Google OAuth integration and a responsive UI.",
+  "requestFramePermissions": [],
+  "prompt": ""
+}

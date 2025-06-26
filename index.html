@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" /> <!-- Placeholder favicon, update if you have one -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Advocacia MZ ERP</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/react-big-calendar/1.11.2/react-big-calendar.css"
+        integrity="sha512-RzR/uY2TzLupsHnJ2ISy1VChKxbhJ1L7z6jQkCAh8M1L7cTr0v3yKjVZF9X8ZAF3h7nSo3Z/Lh3AFH1H1gMIPQ=="
+        crossorigin="anonymous"
+        referrerpolicy="no-referrer"
+    />
+    <style>
+      body {
+        font-family: 'Inter', sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+      /* Custom scrollbar for webkit browsers */
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+      ::-webkit-scrollbar-track {
+        background: #f1f1f1;
+        border-radius: 10px;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: #888;
+        border-radius: 10px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: #555;
+      }
+      html.dark ::-webkit-scrollbar-track,
+      html.inverted ::-webkit-scrollbar-track {
+        background: #1f2937; /* Tailwind gray-800 for dark, adapt for inverted if needed */
+      }
+      html.inverted ::-webkit-scrollbar-track {
+        background: hsl(180, 70%, 10%); /* Darker teal for inverted scrollbar track */
+      }
+      html.dark ::-webkit-scrollbar-thumb {
+        background: #4b5563; /* Tailwind gray-600 */
+      }
+      html.inverted ::-webkit-scrollbar-thumb {
+        background: hsl(180, 50%, 30%); /* Medium teal for inverted scrollbar thumb */
+      }
+      html.dark ::-webkit-scrollbar-thumb:hover,
+      html.inverted ::-webkit-scrollbar-thumb:hover {
+        background: #6b7280; /* Tailwind gray-500 for dark, adapt for inverted */
+      }
+      html.inverted ::-webkit-scrollbar-thumb:hover {
+         background: hsl(180, 50%, 40%); /* Lighter teal for inverted scrollbar thumb hover */
+      }
+
+
+      /* Shadcn UI like CSS Variables */
+      :root {
+        --background: 0 0% 100%; /* white */
+        --foreground: 222.2 84% 4.9%; /* almost black */
+        --card: 0 0% 100%;
+        --card-foreground: 222.2 84% 4.9%;
+        --popover: 0 0% 100%;
+        --popover-foreground: 222.2 84% 4.9%;
+        --primary: 222.2 47.4% 11.2%; /* dark blue */
+        --primary-foreground: 210 40% 98%; /* light gray / almost white */
+        --secondary: 210 40% 96.1%; /* light gray */
+        --secondary-foreground: 222.2 47.4% 11.2%; /* dark blue */
+        --muted: 210 40% 96.1%;
+        --muted-foreground: 215.4 16.3% 46.9%; /* muted gray */
+        --accent: 210 40% 96.1%;
+        --accent-foreground: 222.2 47.4% 11.2%;
+        --destructive: 0 84.2% 60.2%; /* red */
+        --destructive-foreground: 210 40% 98%;
+        --border: 214.3 31.8% 91.4%; /* light gray border */
+        --input: 214.3 31.8% 91.4%;
+        --ring: 222.2 84% 4.9%; /* focus ring - dark blue */
+        --radius: 0.5rem;
+      }
+
+      html.dark {
+        --background: 222.2 84% 4.9%; /* almost black */
+        --foreground: 210 40% 98%; /* light gray / almost white */
+        --card: 222.2 84% 4.9%;
+        --card-foreground: 210 40% 98%;
+        --popover: 222.2 84% 4.9%;
+        --popover-foreground: 210 40% 98%;
+        --primary: 210 40% 98%; /* light gray / almost white */
+        --primary-foreground: 222.2 47.4% 11.2%; /* dark blue */
+        --secondary: 217.2 32.6% 17.5%; /* dark gray */
+        --secondary-foreground: 210 40% 98%;
+        --muted: 217.2 32.6% 17.5%;
+        --muted-foreground: 215 20.2% 65.1%; /* muted light gray */
+        --accent: 217.2 32.6% 17.5%;
+        --accent-foreground: 210 40% 98%;
+        --destructive: 0 62.8% 30.6%; /* dark red */
+        --destructive-foreground: 210 40% 98%;
+        --border: 217.2 32.6% 17.5%; /* dark gray border */
+        --input: 217.2 32.6% 17.5%;
+        --ring: 212.7 26.8% 83.9%; /* focus ring - lighter blue/gray */
+      }
+      
+      html.inverted {
+        --background: 180 70% 14%; /* Dark Teal */
+        --foreground: 180 25% 85%; /* Soft Light Teal/Gray */
+        --card: 180 70% 18%;       /* Medium Dark Teal for cards */
+        --card-foreground: 180 25% 85%;
+        --popover: 180 70% 18%;
+        --popover-foreground: 180 25% 85%;
+        --primary: 42 100% 50%;    /* Amber */
+        --primary-foreground: 180 70% 14%; /* Dark Teal for text on primary */
+        --secondary: 180 60% 28%;   /* Lighter Teal for secondary elements */
+        --secondary-foreground: 180 25% 85%;
+        --muted: 180 60% 28%;
+        --muted-foreground: 180 30% 60%; /* Muted Teal */
+        --accent: 42 100% 50%;       /* Amber */
+        --accent-foreground: 180 70% 14%;
+        --destructive: 0 70% 55%;    /* Red, slightly adjusted for inverted */
+        --destructive-foreground: 180 25% 85%;
+        --border: 180 65% 25%;      /* Teal border */
+        --input: 180 65% 25%;
+        --ring: 42 100% 50%;        /* Amber for focus */
+      }
+
+      /* React Big Calendar Dark Mode Styles */
+      html.dark .rbc-calendar, html.inverted .rbc-calendar {
+        background-color: hsl(var(--card)); 
+        color: hsl(var(--card-foreground)); 
+      }
+      html.dark .rbc-toolbar button, html.inverted .rbc-toolbar button {
+        color: hsl(var(--foreground));
+      }
+      html.dark .rbc-toolbar button:hover,
+      html.dark .rbc-toolbar button:active,
+      html.dark .rbc-toolbar button.rbc-active,
+      html.inverted .rbc-toolbar button:hover,
+      html.inverted .rbc-toolbar button:active,
+      html.inverted .rbc-toolbar button.rbc-active {
+        background-color: hsl(var(--secondary));
+        border-color: hsl(var(--border));
+        color: hsl(var(--secondary-foreground));
+      }
+      html.dark .rbc-header, html.inverted .rbc-header {
+        border-bottom: 1px solid hsl(var(--border));
+        color: hsl(var(--foreground));
+      }
+      html.dark .rbc-day-bg, html.inverted .rbc-day-bg {
+        border-left: 1px solid hsl(var(--border));
+      }
+      html.dark .rbc-month-view,
+      html.dark .rbc-time-view,
+      html.dark .rbc-agenda-view,
+      html.inverted .rbc-month-view,
+      html.inverted .rbc-time-view,
+      html.inverted .rbc-agenda-view {
+        border: 1px solid hsl(var(--border));
+      }
+      html.dark .rbc-off-range-bg, html.inverted .rbc-off-range-bg {
+        background-color: hsl(var(--background) / 0.7); 
+      }
+      html.dark .rbc-today, html.inverted .rbc-today {
+        background-color: hsl(var(--primary) / 0.2); 
+      }
+      html.inverted .rbc-today { /* More prominent today for inverted if primary is light */
+         background-color: hsl(var(--secondary) / 0.3);
+      }
+      html.dark .rbc-event, html.inverted .rbc-event {
+        background-color: hsl(var(--primary));
+        border: 1px solid hsl(var(--primary) / 0.8);
+        color: hsl(var(--primary-foreground));
+      }
+      html.dark .rbc-event.rbc-selected, html.inverted .rbc-event.rbc-selected {
+        background-color: hsl(var(--primary) / 0.8);
+      }
+      html.dark .rbc-event-label, html.inverted .rbc-event-label { 
+        color: hsl(var(--primary-foreground));
+      }
+      html.dark .rbc-slot-selection, html.inverted .rbc-slot-selection { 
+        background-color: hsl(var(--primary) / 0.5);
+      }
+      html.dark .rbc-time-slot, html.inverted .rbc-time-slot { 
+         border-top: 1px solid hsl(var(--border));
+      }
+      html.dark .rbc-current-time-indicator, html.inverted .rbc-current-time-indicator {
+        background-color: hsl(var(--destructive));
+        height: 2px;
+      }
+      /* Agenda View Dark/Inverted Mode */
+      html.dark .rbc-agenda-table, html.inverted .rbc-agenda-table {
+        border: 1px solid hsl(var(--border));
+      }
+      html.dark .rbc-agenda-table th,
+      html.dark .rbc-agenda-table td,
+      html.inverted .rbc-agenda-table th,
+      html.inverted .rbc-agenda-table td {
+        border-bottom: 1px solid hsl(var(--border));
+        padding: 0.5rem;
+      }
+      html.dark .rbc-agenda-table thead, html.inverted .rbc-agenda-table thead {
+        background-color: hsl(var(--secondary));
+      }
+      html.dark .rbc-agenda-date-cell,
+      html.dark .rbc-agenda-time-cell,
+      html.inverted .rbc-agenda-date-cell,
+      html.inverted .rbc-agenda-time-cell {
+        color: hsl(var(--muted-foreground));
+      }
+    </style>
+    <!-- Removed importmap script block entirely -->
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@^19.1.0",
+    "react-dom/": "https://esm.sh/react-dom@^19.1.0/",
+    "react/": "https://esm.sh/react@^19.1.0/",
+    "vite": "https://esm.sh/vite@^7.0.0",
+    "@vitejs/plugin-react": "https://esm.sh/@vitejs/plugin-react@^4.6.0",
+    "path": "https://esm.sh/path@^0.12.7",
+    "url": "https://esm.sh/url@^0.11.4",
+    "zustand": "https://esm.sh/zustand@^5.0.5",
+    "zustand/": "https://esm.sh/zustand@^5.0.5/",
+    "framer-motion": "https://esm.sh/framer-motion@^12.19.1",
+    "lucide-react": "https://esm.sh/lucide-react@^0.523.0",
+    "react-router-dom": "https://esm.sh/react-router-dom@^7.6.2",
+    "date-fns": "https://esm.sh/date-fns@^4.1.0",
+    "react-big-calendar": "https://esm.sh/react-big-calendar@^1.19.4",
+    "date-fns/": "https://esm.sh/date-fns@^4.1.0/",
+    "@dnd-kit/core": "https://esm.sh/@dnd-kit/core@^6.3.1",
+    "@dnd-kit/sortable": "https://esm.sh/@dnd-kit/sortable@^10.0.0",
+    "@dnd-kit/utilities": "https://esm.sh/@dnd-kit/utilities@^3.2.2"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+<body class="bg-gray-50 dark:bg-gray-900"> <!-- Default body classes will be overridden by html.dark/inverted if present -->
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+</body>
+</html>
