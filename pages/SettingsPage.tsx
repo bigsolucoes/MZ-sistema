@@ -1,163 +1,149 @@
-import React from 'react';
-import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/Card';
-import { Input } from '@/components/ui/Input';
-import { Label } from '@/components/ui/Label';
-import { Button } from '@/components/ui/Button';
-import { useAuthStore } from '@/store/authStore';
-import { Sun, Moon, Palette, Bell, KeyRound, Sparkles } from 'lucide-react'; // Added Sparkles for Inverted
-
-type Theme = 'light' | 'dark' | 'inverted';
-
-const themeIcons: Record<Theme, React.ElementType> = {
-  light: Sun,
-  dark: Moon,
-  inverted: Sparkles,
-};
-
-const themeLabels: Record<Theme, string> = {
-  light: 'Claro',
-  dark: 'Escuro',
-  inverted: 'Invertido',
-};
+import React, { useState, useEffect, ChangeEvent } from 'react';
+import { useAppData } from '../hooks/useAppData';
+import toast from 'react-hot-toast';
+import { APP_NAME, SettingsIcon as PageIcon } from '../constants';
+import LoadingSpinner from '../components/LoadingSpinner'; 
 
 const SettingsPage: React.FC = () => {
-  const { user } = useAuthStore();
-  const [currentTheme, setCurrentTheme] = React.useState<Theme>(() => {
-    return (localStorage.getItem('theme') as Theme) || 'light';
-  });
+  const { settings, updateSettings, loading } = useAppData();
+  
+  const [customLogoPreview, setCustomLogoPreview] = useState<string | undefined>(settings.customLogo);
+  const [userNameInput, setUserNameInput] = useState(settings.userName || '');
+  const [primaryColorInput, setPrimaryColorInput] = useState(settings.primaryColor || '#FFFFFF');
+  const [accentColorInput, setAccentColorInput] = useState(settings.accentColor || '#0d47a1');
+  const [splashBgColorInput, setSplashBgColorInput] = useState(settings.splashScreenBackgroundColor || '#FFFFFF');
 
-  const cycleTheme = () => {
-    let nextTheme: Theme;
-    if (currentTheme === 'light') {
-      nextTheme = 'dark';
-    } else if (currentTheme === 'dark') {
-      nextTheme = 'inverted';
-    } else {
-      nextTheme = 'light';
+  useEffect(() => {
+    if (!loading) {
+      setCustomLogoPreview(settings.customLogo);
+      setUserNameInput(settings.userName || '');
+      setPrimaryColorInput(settings.primaryColor || '#FFFFFF');
+      setAccentColorInput(settings.accentColor || '#0d47a1');
+      setSplashBgColorInput(settings.splashScreenBackgroundColor || '#FFFFFF');
     }
-    
-    setCurrentTheme(nextTheme);
-    localStorage.setItem('theme', nextTheme);
-    
-    document.documentElement.classList.remove('dark', 'inverted');
-    // Also update body class to ensure immediate background changes if necessary
-    // Tailwind's JIT might not pick up body changes from html class alone without a refresh sometimes.
-    // So, being explicit for body based on the new theme.
-    if (nextTheme === 'dark') {
-      document.documentElement.classList.add('dark');
-      document.body.className = 'bg-gray-900 text-gray-100'; // Match html.dark body style
-    } else if (nextTheme === 'inverted') {
-      document.documentElement.classList.add('inverted');
-      // For inverted, we use CSS variables, so ensure body uses them
-      document.body.className = 'bg-[hsl(var(--background))] text-[hsl(var(--foreground))]';
-    } else { // Light theme
-      document.body.className = 'bg-gray-50 text-gray-900'; // Default light body
+  }, [settings, loading]);
+
+  const handleLogoUpload = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      if (file.size > 2 * 1024 * 1024) { 
+        toast.error('O arquivo do logotipo é muito grande. Máximo 2MB.');
+        return;
+      }
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setCustomLogoPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
     }
   };
 
-  // Effect to apply initial theme to HTML element based on component's state
-  // This ensures consistency if App.tsx's initial load somehow differs, though they should align.
-  React.useEffect(() => {
-    document.documentElement.classList.remove('dark', 'inverted');
-    if (currentTheme === 'dark') {
-      document.documentElement.classList.add('dark');
-       document.body.className = 'bg-gray-900 text-gray-100';
-    } else if (currentTheme === 'inverted') {
-      document.documentElement.classList.add('inverted');
-      document.body.className = 'bg-[hsl(var(--background))] text-[hsl(var(--foreground))]';
-    } else {
-       document.body.className = 'bg-gray-50 text-gray-900';
-    }
-  }, [currentTheme]);
+  const handleRemoveLogo = () => {
+    setCustomLogoPreview(undefined);
+  }
 
+  const handleSaveChanges = () => {
+    updateSettings({
+      customLogo: customLogoPreview,
+      userName: userNameInput || undefined,
+      primaryColor: primaryColorInput,
+      accentColor: accentColorInput,
+      splashScreenBackgroundColor: splashBgColorInput,
+    });
+    toast.success('Configurações salvas com sucesso!');
+  };
 
-  const NextThemeIcon = currentTheme === 'light' ? themeIcons.dark : currentTheme === 'dark' ? themeIcons.inverted : themeIcons.light;
-  const nextThemeLabel = currentTheme === 'light' ? themeLabels.dark : currentTheme === 'dark' ? themeLabels.inverted : themeLabels.light;
+  const commonInputClass = "w-full p-2 border border-border-color rounded-md focus:ring-2 focus:ring-accent focus:border-accent text-text-primary outline-none transition-shadow bg-card-bg";
+  const sectionCardClass = "bg-card-bg p-6 rounded-xl shadow-lg";
+  const colorInputClass = "p-1 h-10 w-full border border-border-color rounded-md cursor-pointer";
 
+  if (loading) return <div className="flex justify-center items-center h-full"><LoadingSpinner /></div>;
 
   return (
-    <div className="space-y-6">
-      <h1 className="text-3xl font-bold text-gray-800 dark:text-white">Configurações</h1>
+    <div className="space-y-8">
+      <div className="flex items-center">
+        <PageIcon size={32} className="text-accent mr-3" />
+        <h1 className="text-3xl font-bold text-text-primary">Configurações</h1>
+      </div>
       
-      <Card>
-        <CardHeader>
-          <CardTitle>Perfil do Usuário</CardTitle>
-          <CardDescription>Gerencie as informações do seu perfil.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <Label htmlFor="userName">Nome</Label>
-            <Input id="userName" value={user?.name || ''} readOnly className="bg-gray-100 dark:bg-gray-700"/>
+      <div className={sectionCardClass}>
+        <h2 className="text-xl font-semibold text-text-primary mb-4">Dados do Usuário</h2>
+        <div>
+            <label htmlFor="userName" className="block text-sm font-medium text-text-secondary mb-1">Seu Nome (para saudação no painel)</label>
+            <input 
+              type="text" 
+              id="userName" 
+              value={userNameInput} 
+              onChange={(e) => setUserNameInput(e.target.value)} 
+              className={commonInputClass}
+              placeholder="Ex: Dr. João Silva"
+            />
           </div>
-          <div>
-            <Label htmlFor="userEmail">Email</Label>
-            <Input id="userEmail" type="email" value={user?.email || ''} readOnly className="bg-gray-100 dark:bg-gray-700"/>
-          </div>
-           {/* Add more profile fields if editable */}
-          <Button variant="outline" disabled>Atualizar Perfil (Não implementado)</Button>
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Preferências da Interface</CardTitle>
-          <CardDescription>Personalize a aparência do sistema.</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
-              <Palette className="mr-2 h-5 w-5 text-gray-600 dark:text-gray-300" />
-              <Label>Tema Atual: {themeLabels[currentTheme]}</Label>
-            </div>
-            <Button variant="outline" onClick={cycleTheme} className="w-40">
-              <NextThemeIcon className="mr-2 h-4 w-4" />
-              Mudar para {nextThemeLabel}
-            </Button>
-          </div>
-           {/* More preference settings can be added here */}
-        </CardContent>
-      </Card>
+      </div>
       
-      <Card>
-        <CardHeader>
-          <CardTitle>Notificações</CardTitle>
-           <CardDescription>Configure suas preferências de notificação (simulado).</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                    <Bell className="mr-2 h-5 w-5 text-gray-600 dark:text-gray-300" />
-                    <Label>Notificações por Email</Label>
-                </div>
-                <input type="checkbox" className="toggle toggle-primary" defaultChecked disabled/> {/* Placeholder for a toggle switch component */}
+      <div className={sectionCardClass}>
+        <h2 className="text-xl font-semibold text-text-primary mb-4">Personalização da Aparência</h2>
+        <div className="mb-6">
+            <h3 className="text-lg font-medium text-text-primary mb-2">Logotipo da Aplicação</h3>
+            <div className="flex items-center space-x-4">
+            <div>
+                <p className="text-sm text-text-secondary mb-1">Prévia do Logo Atual:</p>
+                {customLogoPreview ? (
+                <img src={customLogoPreview} alt="Custom Logo Preview" className="h-12 border border-border-color rounded p-1 bg-slate-100"/>
+                ) : (
+                <span className={`text-2xl font-bold text-accent border border-border-color rounded p-2 bg-slate-100`}>{APP_NAME}</span>
+                )}
             </div>
-             <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                    <Bell className="mr-2 h-5 w-5 text-gray-600 dark:text-gray-300" />
-                    <Label>Notificações no App</Label>
-                </div>
-                <input type="checkbox" className="toggle toggle-primary" defaultChecked disabled/>
+            <div className="flex-grow">
+                <label htmlFor="logoUpload" className="block text-sm font-medium text-text-secondary mb-1">
+                    Substituir Logotipo (PNG, JPG, SVG - Máx 2MB)
+                </label>
+                <input 
+                    type="file" 
+                    id="logoUpload" 
+                    accept="image/png, image/jpeg, image/svg+xml"
+                    onChange={handleLogoUpload}
+                    className={`${commonInputClass} file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-accent file:text-white hover:file:brightness-90`}
+                />
             </div>
-        </CardContent>
-      </Card>
+            {customLogoPreview && (
+                <button 
+                    onClick={handleRemoveLogo}
+                    className="bg-red-500 text-white px-3 py-2 rounded-lg shadow hover:bg-red-600 transition-colors text-sm self-end"
+                >
+                    Remover Logo
+                </button>
+            )}
+            </div>
+        </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Segurança</CardTitle>
-           <CardDescription>Opções de segurança da conta (simulado).</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                    <KeyRound className="mr-2 h-5 w-5 text-gray-600 dark:text-gray-300" />
-                    <Label>Autenticação de Dois Fatores (2FA)</Label>
+        <div className="mb-6">
+            <h3 className="text-lg font-medium text-text-primary mb-2">Cores do Sistema</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label htmlFor="primaryColor" className="block text-sm font-medium text-text-secondary mb-1">Cor Primária (Fundo Principal)</label>
+                    <input type="color" id="primaryColor" value={primaryColorInput} onChange={(e) => setPrimaryColorInput(e.target.value)} className={colorInputClass} />
                 </div>
-                <Button variant="outline" disabled>Ativar 2FA</Button>
+                <div>
+                    <label htmlFor="accentColor" className="block text-sm font-medium text-text-secondary mb-1">Cor de Destaque</label>
+                    <input type="color" id="accentColor" value={accentColorInput} onChange={(e) => setAccentColorInput(e.target.value)} className={colorInputClass} />
+                </div>
+                <div>
+                    <label htmlFor="splashBgColor" className="block text-sm font-medium text-text-secondary mb-1">Cor Fundo Tela de Descanso</label>
+                    <input type="color" id="splashBgColor" value={splashBgColorInput} onChange={(e) => setSplashBgColorInput(e.target.value)} className={colorInputClass} />
+                </div>
             </div>
-            <Button variant="destructive" disabled>Encerrar todas as outras sessões</Button>
-        </CardContent>
-      </Card>
-
+        </div>
+      </div>
+      
+      <div className="flex justify-end mt-8">
+        <button
+          onClick={handleSaveChanges}
+          className="bg-accent text-white px-6 py-3 rounded-lg shadow hover:brightness-90 transition-all text-lg font-semibold"
+        >
+          Salvar Alterações
+        </button>
+      </div>
     </div>
   );
 };

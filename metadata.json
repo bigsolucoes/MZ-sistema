@@ -1,6 +1,6 @@
 {
-  "name": "Advocacia MZ ERP",
-  "description": "An ERP system for law firms to manage clients, tasks, calendar, contracts, and finances, featuring Google OAuth integration and a responsive UI.",
+  "name": "Juristream",
+  "description": "A streamlined legal practice management system for modern law firms, focusing on case, task, and financial control.",
   "requestFramePermissions": [],
   "prompt": ""
 }

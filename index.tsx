@@ -1,9 +1,8 @@
-
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
-// Tailwind base styles are applied via CDN link in index.html
-// Global styles or react-big-calendar CSS also via index.html
+import { HashRouter } from 'react-router-dom';
+import { AppDataProvider } from './hooks/useAppData';
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
@@ -13,7 +12,10 @@ if (!rootElement) {
 const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>
-    <App />
+    <HashRouter>
+      <AppDataProvider>
+        <App />
+      </AppDataProvider>
+    </HashRouter>
   </React.StrictMode>
 );
-    
